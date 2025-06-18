@@ -1,0 +1,96 @@
+<launch>
+    <!--  ************** Global Parameters ***************  -->
+    <param name="use_sim_time" value="true"/>
+    <arg name="controller"  default="pp" doc="opt: dwa, mpc, pure_pursuit"/> 
+    <arg name="model"  default="serving_bot" doc="opt: serving_bot"/> 
+    <arg name="trajectory_type"  default="mypath_bezier" doc="opt: circle, epitrochoid, infinite,mypath,mypath_bezier,"/> 
+    <arg name="gui" default="false"/>
+    
+    <!--  ************** GAZEBO Simulator ***************  -->
+    <arg name="z_pos" default="0.0"/>
+    <arg name="roll" default="0"/>
+    <arg name="pitch" default="0"/>
+    <!--  ************** circle ***************  -->
+    <arg name="x_pos" default="0.0" if="$(eval trajectory_type == 'circle')" />
+    <arg name="y_pos" default="-5.0" if="$(eval trajectory_type == 'circle')" />
+    <arg name="yaw" default="0" if="$(eval trajectory_type == 'circle')" />
+    <!--  ************** epitrochoid ***************-->
+    <arg name="x_pos" default="3.0"  if="$(eval trajectory_type == 'epitrochoid')" />
+    <arg name="y_pos" default="0.01" if="$(eval trajectory_type == 'epitrochoid')"/>
+    <arg name="yaw" default="-1.57" if="$(eval trajectory_type == 'epitrochoid')"/>
+    <!--  ************** infinite ***************-->
+    <arg name="x_pos" default="10.0" if="$(eval trajectory_type == 'infinite')"/>
+    <arg name="y_pos" default="0.0"  if="$(eval trajectory_type == 'infinite')"/>
+    <arg name="yaw" default="1.57075"  if="$(eval trajectory_type == 'infinite')"/>
+    <!--  ************** mypath ***************  -->
+    <arg name="x_pos" default="0.127" if="$(eval trajectory_type == 'mypath_bezier')" />
+    <arg name="y_pos" default="-0.1474" if="$(eval trajectory_type == 'mypath_bezier')" />
+    <!-- <arg name="yaw" default="0.5321" if="$(eval trajectory_type == 'mypath_bezier')" /> -->
+    <arg name="yaw" default="0" if="$(eval trajectory_type == 'mypath_bezier')" />
+
+    <!--  ************** Robot model ***************  -->
+    <param name="robot_description" command="$(find xacro)/xacro $(find sfy_ros)/urdf/forklift/sfy_forklift_bot.xacro"/>
+
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="world_name" value="$(find gazebo_ros)/launch/empty_world.launch"/>
+        <arg name="paused" value="false"/>
+        <arg name="use_sim_time" value="true"/>
+        <arg name="gui" value="$(arg gui)"/>
+        <arg name="headless" value="false"/>
+        <arg name="debug" value="false"/>
+    </include>
+
+    <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-urdf -model sfy_forklift_bot -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -R $(arg roll) -P $(arg pitch) -Y $(arg yaw) -param robot_description" />
+     
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+        <param name="publish_frequency" type="double" value="50.0" />
+    </node>
+
+    <!--  ************** Reference trajectory generation **************  -->
+     <node name="path_planning" pkg="sfy_motion_controller" type="path_planning" >
+        <param name="trajectory_type" value="$(arg trajectory_type)" />
+        <!-- <rosparam param="wx">[0.0, 10.0,  0.0,   -10.0,  0.0,  10.0]</rosparam>
+        <rosparam param="wy">[0.0,  0.0, 15.0,   0.0,  -10.0,  -10.0]</rosparam> -->
+        <!-- <rosparam param="wx">[0.0, 30.0]</rosparam>
+        <rosparam param="wy">[0.0,  0.0]</rosparam> -->
+        <rosparam param="wx">[0.0, 5.0,  10.0, 10.0,  5.0]</rosparam>
+        <rosparam param="wy">[0.0, 0.0, 0.0, 5.0,  5.0]</rosparam>
+        <param name="R" value="1"/>
+    </node>
+    
+
+    <!--  ************** PP Node **************  -->
+    <node pkg="sfy_motion_controller" type="Pure_Pursuit_Node" name="Pure_Pursuit_Node" output="screen">
+        <!--Basic vehicle information--><!--kesi is the Vehicle front wheel deflection angle-->
+        <param name="L" value="1.462"/>    <!--Vehicle wheelbase-->
+        <param name="v_expect" value="1"/>   <!-- 期望速度 -->
+        <param name="v_max" value="10"/>   <!-- 最大速度 -->
+        <param name="max_steer_state" value="35"/>   <!-- 最大转角 -->
+        <param name="mass" value="2080"/>  
+        <param name="mass_front" value="1040"/>
+        <param name="mass_rear" value="1040"/>
+        <param name="cf" value="155494.663"/>
+        <param name="cr" value="155494.663"/>
+        <param name="horizon" value="100"/>
+        <param name="front_view_distance_law" value="0.1"/>
+        <param name="front_view_distance" value="0.5"/>
+
+        <!--controller information-->
+        <param name="freq" value="20"/>  <!--控制频率-->
+        <param name="slow_LEVE1_DISTANCE" value="3.0"/>  <!--First stage deceleration distance-->
+        <param name="slow_LEVE2_DISTANCE" value="1.0"/>  <!--Secondary deceleration distance-->
+        <param name="goal_tolerance_DISTANCE" value="0.2"/>  <!--Tracking stop distance-->
+        <param name="slow_LEVE1_V" value="0.5"/>
+        <param name="slow_LEVE2_V" value="0.15"/>
+        <param name="limit_v_and_kesi" value="true"/>
+        <param name="delay_model" value="false"/>     <!--是否开启延迟模式-->
+        <param name="steer_vel_delay_pid_model" value="true"/>     <!--是否开启角速度PID模式-->
+        <param name="steer_vel_delay_pid_kp" value="6"/>     <!--   一阶导数   微分6-->
+        <param name="steer_vel_delay_pid_ki" value="0.01"/>  <!-- 误差  增量-->
+        <param name="steer_vel_delay_pid_kd" value="3"/>     <!--   二阶导数   微分3-->
+    </node>
+
+    <!--  ************** Visualisation **************  -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find sfy_motion_controller)/rviz/rviz_navigation.rviz"/>
+
+</launch>

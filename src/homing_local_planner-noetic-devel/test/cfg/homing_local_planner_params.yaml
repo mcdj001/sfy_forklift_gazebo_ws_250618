@@ -1,0 +1,27 @@
+HomingLocalPlanner:
+  odom_topic: odom
+
+  # Trajectory
+  max_global_plan_lookahead_dist: 3.0  # 指定用于优化的全局规划子集的最大长度（累积欧几里得距离）
+  global_plan_viapoint_sep: 0.5        # 从全局规划中提取的每两个连续中途点之间的最小间隔
+  global_plan_prune_distance: 1.0      # 最后一个中途点与目标姿势之间的最小间隔
+  global_plan_goal_sep: 1.0            # 用于修剪的全局规划中机器人与中途点之间的距离
+
+  # Robot
+  max_vel_x: 0.3              # 机器人x方向的最大速度
+  max_vel_x_backwards: 0.2    # 
+  max_vel_theta: 0.4          # 机器人的最大角速度
+  acc_lim_x: 1.0              # 机器人的最大平移加速度
+  acc_lim_theta: 2.0          # 机器人的最大角加速度
+  turn_around_priority: True  # 如果为 true，机器人优先调整方向以适应路径的方向
+  stop_dist: 0.5              # 当规划路径上最近的致命点与机器人坐标系原点之间的欧氏距离小于此距离时，机器人停止
+  dec_dist: 1.0               # 当规划路径上最近的致命点与机器人坐标系原点之间的欧氏距离小于此距离时，机器人减速
+  
+  # GoalTolerance
+  xy_goal_tolerance: 0.1
+  yaw_goal_tolerance: 0.1
+
+  # Optimization
+  k_rho: 1.0
+  k_alpha: -3.0
+  k_phi: -1.0

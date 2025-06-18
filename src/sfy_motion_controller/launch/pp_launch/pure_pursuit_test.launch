@@ -1,0 +1,36 @@
+<launch>
+    <node pkg="sfy_motion_controller" type="Pure_Pursuit_Node" name="Pure_Pursuit_Node" output="screen">
+
+        <!--Basic vehicle information--><!--kesi is the Vehicle front wheel deflection angle-->
+        <param name="L" value="1.9"/>    <!--Vehicle wheelbase-->
+        <param name="v_expect" value="2"/>   <!-- 期望速度 -->
+        <param name="v_max" value="3"/>       <!-- 最大速度 -->
+        <param name="max_steer_state" value="30"/>
+        <param name="mass" value="2080"/>   
+        <param name="mass_front" value="1040"/>
+        <param name="mass_rear" value="1040"/>
+        <param name="cf" value="155494.663"/>
+        <param name="cr" value="155494.663"/>
+        <param name="horizon" value="100"/>
+        <param name="front_view_distance_law" value="0.1"/>
+        <param name="front_view_distance" value="1"/>
+
+        <!--car initial state-->
+        <param name="initial_x" value="-0.127"/>
+        <param name="initial_y" value="-0.1474"/>
+        <param name="initial_yaw" value="0.1321"/>
+        <!-- <param name="initial_yaw" value="3.1321"/> -->
+        <param name="initial_kesi" value="0.0"/>
+
+        <!--controller information-->
+        <param name="freq" value="20"/>  <!--控制频率-->
+        <param name="slow_LEVE1_DISTANCE" value="3.0"/>  <!--First stage deceleration distance-->
+        <param name="slow_LEVE2_DISTANCE" value="1.0"/>  <!--Secondary deceleration distance-->
+        <param name="goal_tolerance_DISTANCE" value="0.2"/>  <!--Tracking stop distance-->
+        <param name="slow_LEVE1_V" value="0.5"/>
+        <param name="slow_LEVE2_V" value="0.15"/>
+        <param name="limit_v_and_kesi" value="true"/><!--If it is an akaman steering car, it must be limited. If it is an omni-directional car, it is optional-->
+    </node>
+    <!--rviz-->
+    <node name="pp_track_rviz" pkg="rviz" type="rviz" required="true" args="-d $(find sfy_motion_controller)/rviz/track_path_PP.rviz"/>
+</launch>

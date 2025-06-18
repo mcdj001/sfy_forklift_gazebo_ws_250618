@@ -1,0 +1,79 @@
+<launch>
+    <!--  ************** Global Parameters ***************  -->
+    <param name="use_sim_time" value="true"/>
+    <arg name="controller"  default="mpc" doc="opt: dwa, mpc, pure_pursuit"/> 
+    <arg name="model"  default="serving_bot" doc="opt: serving_bot"/> 
+    <arg name="trajectory_type"  default="infinite" doc="opt: circle, epitrochoid, square, infinite,mypath,mypath_bezier"/> 
+    <arg name="gui" default="false"/>
+    
+
+    <!--  ************** GAZEBO Simulator ***************  -->
+    <arg name="z_pos" default="0.0"/>
+    <arg name="roll" default="0"/>
+    <arg name="pitch" default="0"/>
+    <!--  ************** circle ***************  -->
+    <arg name="x_pos" default="0.0" if="$(eval trajectory_type == 'circle')" />
+    <arg name="y_pos" default="-5.0" if="$(eval trajectory_type == 'circle')" />
+    <arg name="yaw" default="0" if="$(eval trajectory_type == 'circle')" />
+    <!--  ************** epitrochoid ***************-->
+    <arg name="x_pos" default="3.0"  if="$(eval trajectory_type == 'epitrochoid')" />
+    <arg name="y_pos" default="0.01" if="$(eval trajectory_type == 'epitrochoid')"/>
+    <arg name="yaw" default="-1.57" if="$(eval trajectory_type == 'epitrochoid')"/>
+    <!--  ************** square *************** -->
+    <arg name="x_pos" default="0.0" if="$(eval trajectory_type == 'square')"/>
+    <arg name="y_pos" default="0.0" if="$(eval trajectory_type == 'square')"/>
+    <arg name="yaw" default="1.57075" if="$(eval trajectory_type == 'square')"/>
+    <!--  ************** infinite ***************-->
+    <arg name="x_pos" default="10.0" if="$(eval trajectory_type == 'infinite')"/>
+    <arg name="y_pos" default="0.0"  if="$(eval trajectory_type == 'infinite')"/>
+    <arg name="yaw" default="1.57075"  if="$(eval trajectory_type == 'infinite')"/>
+     <!--  ************** mypath ***************  -->
+    <arg name="x_pos" default="0.0" if="$(eval trajectory_type == 'mypath_bezier')" />
+    <arg name="y_pos" default="0.0" if="$(eval trajectory_type == 'mypath_bezier')" />
+    <arg name="yaw" default="0.0" if="$(eval trajectory_type == 'mypath_bezier')" />
+
+    <!--  ************** Robot model ***************  -->
+    <param name="robot_description" command="$(find xacro)/xacro $(find sfy_ros)/urdf/forklift/sfy_forklift_bot.xacro"/>
+
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="world_name" value="$(find gazebo_ros)/launch/empty_world.launch"/>
+        <arg name="paused" value="false"/>
+        <arg name="use_sim_time" value="true"/>
+        <arg name="gui" value="$(arg gui)"/>
+        <arg name="headless" value="false"/>
+        <arg name="debug" value="false"/>
+    </include>
+
+    <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-urdf -model sfy_forklift_bot -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -R $(arg roll) -P $(arg pitch) -Y $(arg yaw) -param robot_description" />
+     
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+        <param name="publish_frequency" type="double" value="50.0" />
+    </node>
+
+    <!--  ************** Reference trajectory generation **************  -->
+     <node name="path_planning" pkg="sfy_motion_controller" type="path_planning" >
+        <param name="trajectory_type" value="$(arg trajectory_type)" />
+        <!-- <rosparam param="wx">[0.0, 10.0,  0.0,   -10.0,  0.0,  10.0]</rosparam>
+        <rosparam param="wy">[0.0,  0.0, 15.0,   0.0,  -10.0,  -10.0]</rosparam> -->
+        <!-- <rosparam param="wx">[0.0, 30.0]</rosparam>
+        <rosparam param="wy">[0.0,  0.0]</rosparam> -->
+        <rosparam param="wx">[0.0, 5.0,  10.0,   10.0,  5.0]</rosparam>
+        <rosparam param="wy">[0.0,  0.0, 0.0,   5.0,  5.0]</rosparam>
+        <param name="R" value="2.2"/>
+    </node>
+    <node name="path_trajectory_generation" pkg="sfy_motion_controller" type="path_trajectory_generation"  if="$(eval controller == 'pure_pursuit')">
+        <param name="trajectory_type" value="$(arg trajectory_type)" />
+    </node>
+    <node name="dwa_trajectory_generation" pkg="mpc_ros" type="dwa_trajectory_generation.py"  if="$(eval controller == 'dwa')">
+        <param name="trajectory_type" value="$(arg trajectory_type)" />
+    </node>
+
+    <!--  ************** MPC Node **************  -->
+    <node name="tracking_mpc" pkg="sfy_motion_controller" type="tracking_mpc" output="screen" if="$(eval controller == 'mpc')" >
+        <rosparam file="$(find sfy_motion_controller)/params/mpc_params/track_mpc_node_parmas.yaml" command="load" />
+    </node>
+
+    <!--  ************** Visualisation **************  -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find sfy_motion_controller)/rviz/track_mpc.rviz"/>
+
+</launch>

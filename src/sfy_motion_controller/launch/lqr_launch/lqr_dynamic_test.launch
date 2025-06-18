@@ -1,0 +1,38 @@
+<launch>
+    <node pkg="sfy_motion_controller" type="LQR_Dynamic_Node" name="LQR_Dynamic_Node" output="screen">
+
+        <!--Basic vehicle information--><!--kesi is the Vehicle front wheel deflection angle-->
+        <param name="L" value="1.19"/>    <!--Vehicle wheelbase-->
+        <param name="v_expect" value="2"/>   <!-- 期望速度 -->
+        <param name="v_max" value="2"/>   <!-- 最大速度 -->
+        <param name="max_steer_state" value="30"/>
+        <param name="mass" value="2080"/>   <!-- 最大转角 -->
+        <param name="mass_front" value="1040"/>
+        <param name="mass_rear" value="1040"/>
+        <param name="cf" value="155494.663"/>
+        <param name="cr" value="155494.663"/>
+        <param name="horizon" value="100"/>
+
+        <!--car initial state-->
+        <param name="initial_x" value="-0.127"/>
+        <param name="initial_y" value="-0.1474"/>
+        <param name="initial_yaw" value="0.1321"/>
+        <!-- <param name="initial_yaw" value="3.1321"/> -->
+        <param name="initial_kesi" value="0.0"/>
+
+        <!--controller information-->
+        <param name="freq" value="20"/>  <!--控制频率-->
+        <param name="slow_LEVE1_DISTANCE" value="4.0"/>  <!--First stage deceleration distance-->
+        <param name="slow_LEVE2_DISTANCE" value="1.0"/>  <!--Secondary deceleration distance-->
+        <param name="goal_tolerance_DISTANCE" value="0.1"/>  <!--Tracking stop distance-->
+        <param name="slow_LEVE1_V" value="0.5"/>
+        <param name="slow_LEVE2_V" value="0.15"/>
+        <param name="limit_v_and_kesi" value="true"/><!--If it is an akaman steering car, it must be limited. If it is an omni-directional car, it is optional-->
+        <rosparam param="Q_set">[9.0, 1.0, 1.0 , 1.0]</rosparam><!--State weight matrix Q = diag{Q1,Q2,Q3},please set Q<R-->
+        <rosparam param="R_set">[10.0]</rosparam><!--Control input weight matrix R = diag{R1,R2},please set Q<R-->
+        <!-- <param name="Q_set_size" value="4"/>
+        <param name="R_set_size" value="1"/> -->
+    </node>
+    <!--rviz-->
+    <node name="lqr_track_rviz" pkg="rviz" type="rviz" required="true" args="-d $(find sfy_motion_controller)/rviz/track.rviz"/>
+</launch>

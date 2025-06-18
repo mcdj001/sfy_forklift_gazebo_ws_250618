@@ -1,0 +1,30 @@
+# Parameters for control loop
+thread_numbers: 2      #   ROS node线程数量
+pub_twist_cmd: true  #   是否开启/cmd_vel话题
+debug_info: false          #   是否开启debug模式
+delay_mode: true         #   是否开启延时
+steer_vel_delay_pid_model: false 
+max_speed: 2                 # unit: m/s   最大速度
+waypoints_dist: -1.0    # unit: m, set < 0 means computed by node
+path_length: 3.0            # unit: m
+goal_radius: 0.5             # unit: m
+controller_freq: 20       #  控制频率
+
+# Parameter for MPC solver
+mpc_steps: 20.0 
+mpc_ref_cte: 0.0
+mpc_ref_vel: 2
+mpc_ref_etheta: 0.0
+mpc_w_cte: 2000.0
+mpc_w_etheta: 1000.0
+mpc_w_vel: 2000.0
+mpc_w_angvel: 0.0
+mpc_w_angvel_d: 10.0
+mpc_w_accel: 10.0
+mpc_w_accel_d: 10.0
+mpc_max_angvel: 3.8   # Maximal angvel radian (~30 deg)
+mpc_max_throttle: 1 # Maximal throttle accel
+mpc_bound_value: 1.0e3 # Bound value for other variables
+
+
+

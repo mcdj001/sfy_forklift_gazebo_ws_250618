@@ -1,0 +1,19 @@
+<launch>
+    <node pkg="sfy_motion_controller" type="path_planning" name="path_planning" output="screen">
+        <param name="trajectory_type" value="mypath_bezier"/><!--choose the trajectory type default:mypath,mypath_new,circle,mypath_bezier-->
+         <!-- <rosparam param="wx">[0.0, 5.0, 10.0,  5.0,  -5.0,  -10.0 , -5, 5]</rosparam>
+        <rosparam param="wy">[0.0,  0.0, 5.0,   10.0,  10.0,  15.0,  20,  20]</rosparam> -->
+        <!-- <rosparam param="wx">[0.0, 5.0,  0.0,   -5.0,  0.0,  5.0]</rosparam>
+        <rosparam param="wy">[0.0,  0.0, 10.0,   0.0,  -5.0,  -5.0]</rosparam> -->
+        <!-- <rosparam param="wx">[0.0, 10.0,  0.0,   -10.0,  0.0,  10.0]</rosparam>
+        <rosparam param="wy">[0.0,  0.0, 15.0,   0.0,  -10.0,  -10.0]</rosparam> -->
+        <!-- <rosparam param="wx">[0.0, 150.0]</rosparam>
+        <rosparam param="wy">[0.0,  0.0]</rosparam> -->
+        <!-- <rosparam param="wx">[0.0, 5.0,  10.0,   10.0,  5.0]</rosparam>
+        <rosparam param="wy">[0.0,  0.0, 0.0,   5.0,  5.0]</rosparam> -->
+        <rosparam param="wx">[0.0, 4.0, 4.0]</rosparam>
+        <rosparam param="wy">[0.0, 0.0, 9.0]</rosparam>
+        <param name="R" value="1"/>
+    </node>
+
+</launch>
