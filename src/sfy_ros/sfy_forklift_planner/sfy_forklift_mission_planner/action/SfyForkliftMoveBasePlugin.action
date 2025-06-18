@@ -1,0 +1,17 @@
+# sfy_forklift_mission_planner.action
+# Goal: Define the input to start the mission
+geometry_msgs/PoseStamped target_pose
+string mission_id
+float32 x1
+float32 y1
+float32 x2
+float32 y2
+
+---
+# Result: Define the output after the mission completes
+bool success
+string message
+
+---
+# Feedback: Ongoing feedback during the mission
+float32 progress

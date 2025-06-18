@@ -1,0 +1,13 @@
+<launch>
+    <node pkg="sfy_forklift_mission_planner" name="sfy_forklift_collect_planner"  type="sfy_forklift_collect_planner"  output="screen">
+        <param name="frequency" value="20"/>
+        <param name="is_collect_pp" value="false"/>
+        <param name="is_collect_line" value="true"/>
+        <param name="line_csv_path" 
+          value="/home/ubuntu20_sfy/sfy_ws/sfy_forklift_gazebo_ws/src/sfy_ros/sfy_planner
+            /sfy_forklift_mission_planner/data/test_line_foward.csv"/>
+        <param name="pp_controller_csv_path"
+            value="/home/ubuntu20_sfy/sfy_ws/sfy_forklift_gazebo_ws/src/sfy_ros/sfy_planner
+            /sfy_forklift_mission_planner/data/pp_controller.csv"/>
+    </node>
+</launch>

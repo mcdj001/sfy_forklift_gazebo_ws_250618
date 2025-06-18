@@ -1,0 +1,2 @@
+bool current_goal_reached
+bool current_mission_completed

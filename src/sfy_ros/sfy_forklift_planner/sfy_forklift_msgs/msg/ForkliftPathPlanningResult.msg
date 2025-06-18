@@ -1,0 +1,5 @@
+uint16 map_model
+bool is_reverse
+bool is_start_control
+uint16 total_path_index
+uint16 current_path_index

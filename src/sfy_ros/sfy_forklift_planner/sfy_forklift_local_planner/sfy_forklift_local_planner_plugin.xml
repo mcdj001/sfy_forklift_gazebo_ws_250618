@@ -1,0 +1,7 @@
+<library path="lib/libsfy_forklift_local_planner">
+    <class name ="sfy_forklift_local_planner/SfyForkliftLocalPlanner" type ="sfy_forklift_local_planner::SfyForkliftLocalPlanner" base_class_type= "nav_core::BaseLocalPlanner">
+            <description>
+                A implementation of a local planner.
+            </description>
+    </class>
+</library>

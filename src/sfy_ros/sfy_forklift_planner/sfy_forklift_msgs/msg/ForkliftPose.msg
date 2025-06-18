@@ -1,0 +1,8 @@
+float32 forklift0_x
+float32 forklift0_y
+float32 forklift1_x
+float32 forklift1_y
+float32 forklift2_x
+float32 forklift2_y
+float32 forklift3_x
+float32 forklift3_y

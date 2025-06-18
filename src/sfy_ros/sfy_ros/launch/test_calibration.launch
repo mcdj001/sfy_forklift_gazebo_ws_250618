@@ -1,0 +1,53 @@
+<launch>
+
+    <!--  ************** GAZEBO Simulator ***************  -->
+    <arg name="x_pos" default="0.0"/>
+    <arg name="y_pos" default="0.0"/>
+    <arg name="z_pos" default="0.0"/>
+    <arg name="roll" default="0"/>
+    <arg name="pitch" default="0"/>
+    <arg name="yaw" default="0"/>
+    <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find sfy_ros)/models"/>
+    <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find sfy_ros)/models"/>
+
+    <!--  ************** Robot model ***************  -->
+    <param name="robot_description" command="$(find xacro)/xacro $(find sfy_ros)/urdf/forklift/sfy_forklift_bot.xacro"/>
+
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="world_name" value="$(find gazebo_ros)/launch/empty_world.launch"/>
+        <arg name="paused" value="false"/>
+        <arg name="use_sim_time" value="true"/>
+        <arg name="gui" value="true"/>
+        <arg name="headless" value="false"/>
+        <arg name="debug" value="false"/>
+    </include>
+
+    <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-urdf -model sfy_forklift_bot -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -R $(arg roll) -P $(arg pitch) -Y $(arg yaw) -param robot_description" />
+      
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+    </node>
+
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+        <param name="publish_frequency" type="double" value="50.0" />
+    </node>
+
+    <!--  ************** Map **************  -->
+    <!-- <node name="map_server" pkg="map_server" type="map_server" args="$(find sfy_ros)/map/$(arg world_name)/$(arg world_name).yaml" output="screen">
+        <param name="frame_id" value="map"/>
+    </node>
+
+    <node pkg="tf" type="static_transform_publisher" name="perfect_loc_robot" args="0 0 0 0 0 0 map odom 100" /> -->
+
+    <!-- <node name="robot_calibration" pkg="robot_calibration" type="calibrate_linear.py" /> -->
+
+    <node pkg="rqt_reconfigure" type="rqt_reconfigure" name="rqt_reconfigure" />
+
+     <!--  ************** QT robot_steering **************  -->
+    <node pkg="rqt_robot_steering" type="rqt_robot_steering" name="rqt_robot_steering" >
+        <param name="default_topic" value="/cmd_vel"/>
+    </node>
+
+    
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find sfy_ros)/rviz/test_calibration.rviz"/>
+
+</launch>

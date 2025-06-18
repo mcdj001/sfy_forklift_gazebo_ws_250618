@@ -1,0 +1,71 @@
+/*
+ * @Descripttion: sfy_code
+ * @version: 
+ * @Author: Fengyuan Shen
+ * @Date: 2024-06-04 13:59:26
+ * @LastEditors: Fengyuan Shen
+ * @LastEditTime: 2024-10-23 14:14:57
+ */
+#ifndef SFY_MOTION_CONTROLLER_TOOL_H
+#define SFY_MOTION_CONTROLLER_TOOL_H
+
+#include <iostream>
+#include <math.h>
+#include <vector>
+#include <cmath>
+#include <algorithm>
+#include <Eigen/Dense>
+#include <geometry_msgs/PoseStamped.h>
+
+using namespace std;
+using namespace Eigen;
+
+//定义路径点
+typedef struct waypoint {
+    int ID;
+    double x, y, yaw;  //x , y
+}waypoint;
+
+//定义小车状态
+typedef struct vehicleState {
+    double x, y, yaw, v, kesi; // x,y,yaw,前轮偏角kesi
+}vehicleState;
+
+//定义控制量
+typedef struct U {
+    double v;
+    double kesi;  //速度v,前轮偏角kesi
+}U;
+
+typedef struct vehicleDynamicParam{
+    double L;           // 轴距
+    double lr;          // 后轮距离重心轴距
+    double lf;          // 前轮距离重心轴距
+    double cf;          // 前轮侧偏刚度
+    double cr;          // 后轮侧偏刚度
+    double iz;          // z轴的转动惯量
+    double mass;        // 整车质量
+    double mass_front;
+    double mass_rear;
+    double delta_t;     // LQR的时间步长
+    int ref_index;      // 跟踪参考点
+    int horizon;        // 求解黎卡提方程的迭代次数
+    double current_v;
+    double current_w;
+    double target_index_K; //目标点曲率
+}vehicleDynamicParam;
+
+namespace  SfyMotionController {
+    class MyTools{
+        public:
+            double cal_k_poseStamped(vector<geometry_msgs::PoseStamped> waypoints, int index);
+            double cal_K(vector<waypoint> waypoints, int index);  //计算曲率K
+            double normalizeAngle(double angle);  // 角度限制在[-pi  , pi]
+            double factorial(int n);  // 阶乘
+            Vector2d bezierCommon(vector<Vector2d> Ps, double t); // 贝塞尔曲线最简单形式
+        private:
+    };
+}
+
+
+#endif    // SFY_MOTION_CONTROLLER_TOOL_H

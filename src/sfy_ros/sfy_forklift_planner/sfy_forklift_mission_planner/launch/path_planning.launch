@@ -1,0 +1,31 @@
+<launch>
+
+    <node pkg="sfy_forklift_mission_planner" type="sfy_forklift_mission" name="sfy_forklift_mission" output="screen">
+        <param name="frequency" value="15" />
+        <param name="forklift_id" value="1" />
+        <param name="forklift_target_point" value="23" />
+        <param name="forklift_target_yaw" value="3" />
+    </node>
+    <!-- choose the trajectory type default:mypath, mypath_new, mypath_bezier, circle, -->
+     <!-- <rosparam param="wx">[2.0, 10.0]</rosparam>
+    <rosparam param="wy">[3.0, 3.0]</rosparam> -->
+    <node pkg="sfy_forklift_mission_planner" type="sfy_forklift_path_planner" name="sfy_forklift_path_planner" output="screen">
+        <param name="trajectory_type" value="mypath_bezier"/>
+        <!-- <rosparam param="wx">[2.5, 9.6, 9.6, 1.5, 1.5]</rosparam>
+        <rosparam param="wy">[5.1, 5.1, 9.9, 9.9, 6.3]</rosparam> -->
+        <rosparam param="wx">[5, 6.6, 6.6]</rosparam>
+        <rosparam param="wy">[9.9, 9.9, 11.7]</rosparam>
+        <!-- <rosparam param="wx">[2.0, 11.0]</rosparam>
+        <rosparam param="wy">[3.0, 3.0]</rosparam> -->
+        <param name="R" value="0.6"/>
+        <param name="line_distance" value="0.01" />
+        <param name="curve_num" value="200"/>
+        <param name="desired_path_frame_id" value="odom"/>
+        <param name="frequency" value="15"/>
+        <param name="map_file_path" value="$(find sfy_forklift_mission_planner)/map/floor.map" />
+        <param name="int_path_planning_mode" value="0"/>
+    </node>
+
+
+    
+</launch>

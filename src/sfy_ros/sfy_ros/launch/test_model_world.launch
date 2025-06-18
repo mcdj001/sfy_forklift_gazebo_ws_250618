@@ -1,0 +1,44 @@
+<launch>
+  <!-- Always set GUI to false for AWS RoboMaker Simulation
+       Use gui:=true on roslaunch command-line to run with a gui.
+  -->
+  <arg name="gui" default="true"/>
+  <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find sfy_ros)/models"/>
+  <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find sfy_ros)/models"/>
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find sfy_ros)/worlds/warehouse.world"/>
+    <arg name="paused" default="false"/>
+    <arg name="use_sim_time" default="true"/>
+    <arg name="gui" default="$(arg gui)"/>
+    <arg name="headless" default="false"/>
+    <arg name="debug" default="false"/>
+    <arg name="verbose" default="true"/>
+  </include>
+
+  <!--  ************** Navigation ***************  -->
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+      <rosparam file="$(find sfy_ros)/params/local_params/costmap_common_params.yaml"
+      command="load" ns="global_costmap" />
+      <rosparam file="$(find sfy_ros)/params/local_params/costmap_common_params.yaml"
+      command="load" ns="local_costmap" />
+      <rosparam file="$(find sfy_ros)/params/local_params/local_costmap_params.yaml"
+      command="load" />
+      <rosparam file="$(find sfy_ros)/params/local_params/global_costmap_params.yaml"
+      command="load" />
+      <rosparam file="$(find sfy_ros)/params/local_params/sfy_forklift_local_planner_params.yaml"
+      command="load" />
+      <rosparam file="$(find sfy_ros)/params/local_params/mpc_waypoint_tracker_ros_params.yaml"
+      command="load" />
+
+      <!-- <param name="base_global_planner" value="global_planner/GlobalPlanner" /> -->
+      <param name="base_global_planner" value="sfy_forklift_global_planner/SfyForkliftGlobalPlanner" />
+      <param name="planner_frequency" value="0.0" />
+      <param name="planner_patience" value="5.0" />
+
+      <!-- <param name="base_local_planner" value="sfy_forklift_local_planner/SfyForkliftLocalPlanner" /> -->
+      <param name="base_local_planner" value="mpc_waypoint_tracking_controller/MPCWayPointTrackerROS" />
+      <param name="controller_frequency" value="20.0" />
+      <param name="controller_patience"  value="15.0" />
+  </node>
+</launch>

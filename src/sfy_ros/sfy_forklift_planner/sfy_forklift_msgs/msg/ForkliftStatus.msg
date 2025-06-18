@@ -1,0 +1,2 @@
+uint16 forklift_id
+uint16 forklift_status

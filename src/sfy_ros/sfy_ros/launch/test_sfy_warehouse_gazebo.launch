@@ -1,0 +1,100 @@
+<launch>
+
+    <!--  ************** GAZEBO Simulator ***************  -->
+    <arg name="x_pos" default="0.5"/>
+    <arg name="y_pos" default="0.0"/>
+    <arg name="z_pos" default="0.0"/>
+    <arg name="roll" default="0"/>
+    <arg name="pitch" default="0"/>
+    <arg name="yaw" default="0"/>
+    <arg name="world_name" default="warehouse"/>    <!--warehouse   warehouse_2  factory empty_world-->
+    <arg name="vehicleHeight" default="1.5"/>
+    <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find sfy_ros)/models"/>
+    <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find sfy_ros)/models"/>
+
+    <!--  ************** Robot model ***************  -->
+    <param name="robot_description" command="$(find xacro)/xacro $(find sfy_ros)/urdf/forklift/sfy_forklift_bot.xacro"/>
+
+    <include file="$(find gazebo_ros)/launch/empty_world.launch" >
+        <arg name="paused" value="false"/>
+        <arg name="use_sim_time" value="true"/>
+        <arg name="gui" value="true"/>
+        <arg name="headless" value="false"/>
+        <arg name="debug" value="false"/>
+        <arg name="world_name" value="$(find sfy_ros)/worlds/$(arg world_name).world"/>
+    </include>
+
+    <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-urdf -model sfy_forklift_bot -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -R $(arg roll) -P $(arg pitch) -Y $(arg yaw) -param robot_description" />
+      
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+    </node>
+
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+        <param name="publish_frequency" type="double" value="50.0" />
+    </node>
+
+    <!--  ************** Map **************  -->
+    <node name="map_server" pkg="map_server" type="map_server" args="$(find sfy_ros)/map/$(arg world_name)/$(arg world_name).yaml" output="screen">
+        <param name="frame_id" value="map"/>
+    </node>
+
+    <node pkg="tf" type="static_transform_publisher" name="perfect_loc_robot" args="0 0 0 0 0 0 map odom 100" />
+
+    <!--  ************** QT robot_steering **************  -->
+    <node pkg="rqt_robot_steering" type="rqt_robot_steering" name="rqt_robot_steering" >
+        <param name="default_topic" value="/cmd_vel"/>
+    </node>
+
+    <!--  ************** depthimage_to_laserscan **************  -->
+    <node pkg="depthimage_to_laserscan" type="depthimage_to_laserscan" name="depthimage_to_laserscan">
+        <remap from="image" to="/camera/depth/image_raw" />
+        <remap from="camera_info" to="/camera/depth/camera_info"/> 
+        <!-- <param name="output_frame_id" value="camera"  /> -->
+        <param name="scan_height"     type="int"    value="100"/> <!-- default: 1 pixel. Number of pixel rows used to generate laser scan. -->
+        <param name="scan_time"       type="double" value="0.033"/> <!-- default:0.033, 30 FPS . Time between scans. -->
+        <param name="range_min"       type="double" value="0.45"/> <!--default:0.45m. Ranges less than this are considered -Inf. -->
+        <param name="range_max"       type="double" value="10.0"/> <!--default: 10m. Ranges less than this are considered +Inf. -->
+        <param name="output_frame_id" type="str"    value="camera_depth_frame"/> <!--default: camera_depth_frame. Frame id of the laser scan. -->
+    </node>
+
+    <!--  ************** Path_Planning **************  -->
+    <node pkg="sfy_forklift_mission_planner" type="sfy_forklift_path_planner" name="sfy_forklift_path_planner" output="screen">
+        <!--choose the trajectory type default:mypath, mypath_new, mypath_bezier, circle, -->
+        <param name="trajectory_type" value="mypath_bezier"/>
+        <!-- <rosparam param="wx">[0.5, 30.0]</rosparam>
+        <rosparam param="wy">[0.0, 0.0]</rosparam> -->
+        <!-- <rosparam param="wx">[0.5, 4.0, 4.0 , -9.2 , -9.2]</rosparam>
+        <rosparam param="wy">[0.0, 0.0, 8.7 , 8.7, 0]</rosparam> -->
+        <rosparam param="wx">[0.5, 4.0, 4.0 , 0]</rosparam>
+        <rosparam param="wy">[0.0, 0.0, 8.7 , 8.7]</rosparam>
+        <param name="line_distance" value="0.1"/>
+        <param name="curve_num" value="50"/>
+        <param name="R" value="1"/>
+        <param name="desired_path_frame_id" value="odom"/>
+        <param name="frequency" value="15"/>
+        <param name="map_file_path" value="/home/ubuntu20_sfy/sfy_ws/sfy_forklift_gazebo_ws/src/sfy_ros/sfy_forklift_planner/sfy_forklift_mission_planner/map/test.map"/>        
+    </node>
+ 
+ 
+
+    <!--  ************** Move_Base **************  -->
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+        <rosparam file="$(find sfy_ros)/params/move_base/costmap_common_params.yaml" command="load" ns="global_costmap" />
+        <rosparam file="$(find sfy_ros)/params/move_base/costmap_common_params.yaml" command="load" ns="local_costmap" />
+        <rosparam file="$(find sfy_ros)/params/move_base/local_costmap_params.yaml" command="load" />
+        <rosparam file="$(find sfy_ros)/params/move_base/global_costmap_params.yaml" command="load" />
+        <rosparam file="$(find sfy_ros)/params/sfy_forklift_local_planner_params.yaml" command="load" />
+
+        <param name="base_global_planner" value="sfy_forklift_global_planner/SfyForkliftGlobalPlanner" />
+        <param name="planner_frequency" value="10.0" />
+        <param name="planner_patience" value="5.0" />
+
+        <param name="base_local_planner" value="sfy_forklift_local_planner/SfyForkliftLocalPlanner" />
+        <param name="controller_frequency" value="20.0" />
+        <param name="controller_patience" value="15.0" />
+    </node>
+    
+
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find sfy_ros)/rviz/test_sfy_empty_gazebo.rviz"/>
+
+</launch>

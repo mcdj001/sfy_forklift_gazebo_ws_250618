@@ -1,0 +1,161 @@
+<?xml version="1.0" ?>
+<robot name="sfy_forklift_bot">
+
+  <!-- <link name="base_footprint">
+  </link> -->
+
+  <!-- <joint name="base_footprint_joint" type="fixed">
+        <origin xyz="0 0 0.05" rpy="0 0 0" />
+        <child link="base_link" />
+        <parent link="base_footprint"/>
+  </joint> -->
+
+  <link name="base_link">
+    <visual>
+      <origin xyz="1.352 0 0.44" rpy="0 0 0" />
+      <geometry>
+        <box size="0.74 0.79 0.79" />
+      </geometry>
+      <material name="green">
+            <color rgba="0.0 0.8 0.0 1.0"/>
+        </material>
+    </visual>
+  </link>
+
+    <link name="left_fork">
+        <visual>
+        <origin xyz="0 0 0.0" rpy="0 0 0" />
+        <geometry>
+            <box size="1.15 0.16 0.06" />
+        </geometry>
+        
+        <material name="red">
+             <color rgba="0.8 0.0 0.0 1.0"/>
+        </material>
+        </visual>
+    </link>
+
+    <link name="right_fork">
+        <visual>
+        <origin xyz="0 0 0.0" rpy="0 0 0" />
+        <geometry>
+            <box size="1.15 0.16 0.06" />
+        </geometry>
+        
+         <material name="red">
+            <color rgba="0.8 0.0 0.0 1.0"/>
+        </material>
+        </visual>
+     </link>
+
+  <link name="base_fork">
+        <visual>
+        <origin xyz="0 0 0.0" rpy="0 0 0" />
+        <geometry>
+            <box size="0.01 0.01 0.01" />
+        </geometry>
+        
+         <material name="grey">
+            <color rgba="0.5 0.5 0.5 1.0"/>
+        </material>
+        </visual>
+    </link>
+
+    <joint name="left_fork_joint" type="fixed">
+        <origin xyz="0 0.18 0.0" rpy="0 0 0" />
+        <child link="left_fork" />
+        <parent link="base_fork"/>
+    </joint>
+
+    <joint name="right_fork_joint" type="fixed">
+        <origin xyz="0.0 -0.18 0.0" rpy="0 0 0" />
+        <child link="right_fork" />
+        <parent link="base_fork"/>
+    </joint>
+
+    <joint name="fork_joint" type="prismatic">
+        <origin xyz="0.432 0.0 0.0" rpy="0 0 0" />
+        <parent link="base_link" />
+        <child link="base_fork"/>
+        <axis xyz="0 0 1" />
+        <limit lower="-1" upper="1" effort="10" velocity="100" />
+    </joint>
+
+    <link name="steer_link">
+        <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+            <box size="0.1 0.1 0.1" />
+        </geometry>
+       <material name="orange_sfy">
+             <color rgba="1 0.4 0.3 1.0"/>
+        </material>
+        </visual>
+    </link>
+
+    <link name="sd_wheel_link">
+        <visual>
+        <origin xyz="0 0 0" rpy="1.57 0 0" />
+        <geometry>
+            <cylinder radius="0.115" length="0.07" />
+        </geometry>
+        <material name="black_sfy">
+            <color rgba="0.0 0.0 0.0 1.0"/>
+        </material>
+        </visual>
+    </link>    
+
+    <joint name="base2steer_joint" type="revolute">
+        <parent link="base_link"/>
+        <child link="steer_link"/>
+         <limit effort="10000.0" lower="-1.1" upper="1.1" velocity="100"/>
+        <origin xyz="1.462 0 0.076" rpy="0 0 0" />
+        <axis xyz="0 0 1" />
+    </joint>
+
+    <joint name="steer2sd_wheel_joint" type="continuous">
+        <parent link="steer_link"/>
+        <child link="sd_wheel_link"/>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <axis xyz="0 1 0" />
+    </joint>
+
+    <link name="fixed_left_wheel_link">
+        <visual>
+        <origin xyz="0 0 0" rpy="1.57 0 0" />
+        <geometry>
+            <cylinder radius="0.04" length="0.07" />
+        </geometry>
+        <material name="grey_sfy">
+           <color rgba="0.5 0.5 0.5 1.0"/>
+        </material>
+        </visual>
+    </link>
+
+    <joint name="base2fixed_left_wheel_joint" type="continuous">
+        <parent link="base_link"/>
+        <child link="fixed_left_wheel_link"/>
+        <origin xyz="0.0 0.18 0.0" rpy="0 0 0" />
+        <axis xyz="0 1 0" />
+    </joint>
+
+    <link name="fixed_right_wheel_link">
+        <visual>
+        <origin xyz="0 0 0" rpy="1.57 0 0" />
+        <geometry>
+            <cylinder radius="0.04" length="0.07" />
+        </geometry>
+        <material name="grey_sfy">
+          <color rgba="0.5 0.5 0.5 1.0"/>
+        </material>
+        </visual>
+    </link>
+
+    <joint name="base2fixed_right_wheel_joint" type="continuous">
+        <parent link="base_link"/>
+        <child link="fixed_right_wheel_link"/>
+        <origin xyz="0.0 -0.18 0.0" rpy="0 0 0" />
+        <axis xyz="0 1 0" />
+  </joint>
+
+</robot>

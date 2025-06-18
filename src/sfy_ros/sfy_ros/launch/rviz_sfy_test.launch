@@ -1,0 +1,25 @@
+<launch>
+    <arg name="fixed_frame" default="world"/>
+
+    <param name="robot_description" command="$(find xacro)/xacro $(find sfy_ros)/urdf/forklift/sfy_forklift_bot.xacro"/>
+
+    <node pkg="joint_state_publisher" type="joint_state_publisher" name="joint_state_publisher"/>
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher"/>
+
+        <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="world_name" value="empty.world"/>
+        <arg name="paused" value="false"/>
+        <arg name="use_sim_time" value="true"/>
+        <arg name="gui" value="false"/>
+        <arg name="headless" value="false"/>
+        <arg name="debug" value="false"/>
+    </include>
+
+    <!-- <node pkg="rqt_robot_steering" type="rqt_robot_steering" name="rqt_robot_steering" >
+        <param name="default_topic" value="/cmd_vel"/>
+    </node> -->
+
+
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find sfy_ros)/rviz/rviz_sfy_test.rviz"/>
+    
+</launch>

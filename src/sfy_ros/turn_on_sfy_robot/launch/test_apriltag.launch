@@ -1,0 +1,40 @@
+<launch>
+   <arg name="car_mode"  default="sfy_forklift" /> 
+    <arg name="odom_frame_id"  default="odom"/>     <!-- 设置里程计话题起点TF坐标  odom_combined-->
+
+    <!-- 打开摄像头  usb_cam  Intel 相机二选一 -->
+    <!-- <include file="$(find realsense2_camera)/launch/rs_camera.launch" /> -->
+    <include file="$(find usb_cam)/launch/usb_cam-test.launch" />
+
+    <!-- 打开Apriltag定位功能 -->
+    <include file="$(find turn_on_sfy_robot)/launch/continuous_detection.launch" />
+
+    <!-- 打开串口通信以及叉车控制功能 -->
+    <node pkg="turn_on_sfy_robot" type="sfy_robot_node" name="sfy_robot_node" output="screen" respawn="false">
+        <param name="usart_port_name"    type="string" value="/dev/forklift_controller"/> 
+        <param name="serial_baud_rate"   type="int"    value="115200"/>
+        <param name="odom_frame_id"      type="string" value="$(arg odom_frame_id)"/> 
+        <param name="robot_frame_id"     type="string" value="base_footprint"/> 
+        <param name="gyro_frame_id"      type="string" value="gyro_link"/> 
+
+        <!-- 里程计修正参数，对来自运动底盘的速度信息进行手动修正 -->
+        <param name="odom_x_scale"      type="double" value="1.0"/> 
+        <param name="odom_y_scale"      type="double" value="1.0"/> 
+        <param name="odom_z_scale_positive"      type="double" value="1.0"/> 
+        <param name="odom_z_scale_negative"      type="double" value="1.0"/> 
+
+        <param name="camera_to_base_footprint_x"      type="double" value="1.23"/>
+        <param name="camera_to_base_footprint_y"      type="double" value="0.0"/> 
+
+        <param name="frequency"  type="double" value="20"/>
+        <param name="debug_apriltag_model"  type="bool" value="true" /> 
+    </node>
+<!-- 
+    <node pkg="rqt_robot_steering" type="rqt_robot_steering" name="rqt_robot_steering" >
+        <param name="default_topic" value="/cmd_vel"/>
+        <param name="publish_frequency" type="double" value="20.0" />
+    </node> -->
+    
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find turn_on_sfy_robot)/rviz/camera.rviz" />
+
+</launch>

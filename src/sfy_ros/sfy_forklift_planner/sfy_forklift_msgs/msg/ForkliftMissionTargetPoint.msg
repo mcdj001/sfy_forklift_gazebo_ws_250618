@@ -1,0 +1,6 @@
+bool is_start_mission
+uint16  forklift_id
+float32 forklift_target_point
+uint16 forklift_target_yaw
+string  start_time
+string end_time

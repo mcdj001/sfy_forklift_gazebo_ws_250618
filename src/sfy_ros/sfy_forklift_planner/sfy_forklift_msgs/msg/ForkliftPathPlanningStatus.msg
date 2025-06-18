@@ -1,0 +1,3 @@
+uint16 forklift_id
+uint16 forklift_path_planning_status
+uint16 forklift_path_tracking_status

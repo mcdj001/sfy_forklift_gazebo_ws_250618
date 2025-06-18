@@ -1,0 +1,329 @@
+<?xml version="1.0"?>
+<!-- /*
+ * @Description: 
+ * @Version: 
+ * @Author: Fengyuan Shen
+ * @Date: 2024-07-04 16:59:48
+ * @LastEditors: Fengyuan Shen
+ * @LastEditTime: 2024-09-24 18:03:24
+ * @FilePath: /sfy_forklift_gazebo_ws/src/sfy_ros/sfy_ros/urdf/forklift/sfy_forklift_bot.xacro
+ * Copyright (c) 2024, GPL-3.0 license, Fengyuan Shen, All Rights Reserved.
+ */ -->
+
+<robot name="sfy_forklift_bot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  
+  <!-- Arguments used in sfy_forklift_bot.gazebo -->
+  <xacro:arg name="controller_prefix" default=""/>
+  <xacro:arg name="imu_visual"   default="false"/>
+  <xacro:arg name="lidar_visual"    default="false"/>
+  <xacro:property name="forks_pidP" value="3000" />
+  <xacro:property name="forks_pidI" value="0" />
+  <xacro:property name="forks_pidD" value="10" />
+
+
+  <xacro:include filename="$(find sfy_ros)/urdf/common/common_ma.xacro" />
+  <xacro:include filename="$(find sfy_ros)/urdf/forklift/sfy_forklift_bot.gazebo" />
+  <!-- <xacro:include filename="$(find realsense2_description)/urdf/_d435i.urdf.xacro" /> -->
+  <xacro:arg name="use_nominal_extrinsics" default="false" />
+  <!-- <xacro:include filename="$(find realsense_ros_gazebo)/xacro/depthcam.xacro"/> -->
+
+ 
+  <xacro:property name="M_PI" value="3.1415926535897931" />
+  <xacro:property name="negative_half_pi" value="${M_PI * 0.5}" />
+  <xacro:property name="sfy_forklift_steer_max" value="${ M_PI / 3 }" />
+  <xacro:property name="sfy_forklift_steer_min" value="${-M_PI / 3 }" />
+
+
+  <link name="base_footprint">
+  </link>
+
+  <joint name="base_footprint_joint" type="fixed">
+    <origin xyz="0 0 0.05" rpy="0 0 0" />
+    <child link="base_link" />
+    <parent link="base_footprint"/>
+  </joint>
+
+  <!-- Base Link -->
+  <link name="base_link">
+    <inertial>
+      <mass value="20"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1" />
+      <origin/>
+    </inertial>
+    <visual>
+      <!-- <origin xyz="0.8 0 0.4" rpy="0 0 0" /> -->
+      <origin xyz="1.352 0 0.44" rpy="0 0 0" />
+      <geometry>
+        <!-- <box size="0.5 0.55 0.7" /> -->
+        <box size="0.74 0.79 0.79" />
+      </geometry>
+      <material name="green_sfy"/>
+    </visual>
+    
+    <collision>
+      <!-- <origin xyz="0.8 0 0.4" rpy="0 0 0" />  -->
+      <origin xyz="1.352 0 0.44" rpy="0 0 0" />
+      <geometry>
+        <!-- <box size="0.5 0.55 0.7" /> -->
+        <box size="0.74 0.40 0.79" />
+      </geometry>
+    </collision>
+  </link>
+  
+  <link name="left_fork">
+    <inertial>
+      <mass value="1" />
+      <origin xyz="0 0 0.0" />
+      <inertia ixx="0.01" ixy="0.0" ixz="0.0"
+                iyy="0.01" iyz="0.0" izz="0.01" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0.0" rpy="0 0 0" />
+      <geometry>
+        <!-- <box size="0.8 0.1 0.01" /> -->
+        <box size="1.15 0.16 0.06" />
+      </geometry>
+      
+      <material name="red_sfy" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.0" rpy="0 0 0" />
+      <geometry>
+        <!-- <box size="0.8 0.1 0.01" /> -->
+        <box size="1.15 0.16 0.06" />
+      </geometry>
+<!-- <contact_coefficients mu="1" kp="10.0" kd="10.0"/> -->
+    </collision>
+  </link>
+
+  <link name="right_fork">
+    <inertial>
+      <mass value="1" />
+      <origin xyz="0 0 0.0" />
+      <inertia ixx="0.01" ixy="0.0" ixz="0.0"
+                iyy="0.01" iyz="0.0" izz="0.01" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0.0" rpy="0 0 0" />
+      <geometry>
+        <!-- <box size="0.8 0.1 0.01" /> -->
+        <box size="1.15 0.16 0.06" />
+      </geometry>
+      
+      <material name="red_sfy" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.0" rpy="0 0 0" />
+      <geometry>
+        <!-- <box size="0.8 0.1 0.01" /> -->
+        <box size="1.15 0.16 0.06" />
+      </geometry>
+<!-- <contact_coefficients mu="1" kp="10.0" kd="10.0"/>  -->
+    </collision>
+  </link>
+
+  <link name="base_fork">
+    <inertial>
+      <mass value="0.1" />
+      <origin xyz="0 0 0.0" />
+      <inertia ixx="0.01" ixy="0.0" ixz="0.0"
+                iyy="0.01" iyz="0.0" izz="0.01" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0.0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.01 0.01" />
+      </geometry>
+      
+      <material name="grey_sfy" />
+    </visual>
+  </link>
+
+  <!-- static joint connect the single prismatic joint with the forks... -->
+  <joint name="left_fork_joint" type="fixed">
+    <!-- <origin xyz="0 0.205 0.0" rpy="0 0 0" /> -->
+    <origin xyz="0 0.18 0.0" rpy="0 0 0" />
+    <child link="left_fork" />
+    <parent link="base_fork"/>
+  </joint>
+
+  <joint name="right_fork_joint" type="fixed">
+    <!-- <origin xyz="0 -0.205 0.0" rpy="0 0 0" /> -->
+    <origin xyz="0.0 -0.18 0.0" rpy="0 0 0" />
+    <child link="right_fork" />
+    <parent link="base_fork"/>
+  </joint>
+
+
+  <joint name="fork_joint" type="prismatic">
+    <!-- <origin xyz="0.18 0.0 0.0" rpy="0 0 0" /> -->
+    <origin xyz="0.432 0.0 0.0" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="base_fork"/>
+    <axis xyz="0 0 1" />
+    <limit lower="-1" upper="1" effort="1000" velocity="100" />
+  </joint>
+
+  <link name="steer_link">
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001" />
+      <origin/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.1 0.1 0.1" />
+      </geometry>
+      <material name="orange_sfy"/>
+    </visual>
+  </link>
+  
+  <link name="sd_wheel_link">
+    <inertial>
+      <mass value="10"/>
+      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
+      <origin/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.57 0 0" />
+      <geometry>
+        <cylinder radius="0.115" length="0.07" />
+      </geometry>
+      <material name="black_sfy"/>
+    </visual>
+    
+    <collision>
+      <origin xyz="0 0 0" rpy="1.57 0 0" />
+      <geometry>
+        <cylinder radius="0.115" length="0.07" />
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="base2steer_joint" type="revolute">
+    <parent link="base_link"/>
+    <child link="steer_link"/>
+    <limit effort="10000.0" lower="${sfy_forklift_steer_min}" upper="${sfy_forklift_steer_max}" velocity="100"/>
+    <!-- <origin xyz="1.19 0 0.04" rpy="0 0 0" /> -->
+    <origin xyz="1.462 0 0.076" rpy="0 0 0" />
+    <axis xyz="0 0 1" />
+  </joint>
+
+
+  <joint name="steer2sd_wheel_joint" type="continuous">
+    <parent link="steer_link"/>
+    <child link="sd_wheel_link"/>
+    <limit effort="10000.0" velocity="100"/>
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <axis xyz="0 1 0" />
+  </joint>
+
+  <link name="fixed_left_wheel_link">
+    <inertial>
+      <mass value="0.1"/>
+      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
+      <origin/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.57 0 0" />
+      <geometry>
+        <cylinder radius="0.04" length="0.07" />
+      </geometry>
+      <material name="grey_sfy"/>
+    </visual>
+    
+    <collision>
+      <origin xyz="0 0 0" rpy="1.57 0 0" />
+      <geometry>
+        <cylinder radius="0.04" length="0.07" />
+      </geometry>
+      <!-- <contact_coefficients mu="100" kp="10.0" kd="0.1"/> -->
+    </collision>
+  </link>
+      
+  <joint name="base2fixed_left_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="fixed_left_wheel_link"/>
+    <!-- <origin xyz="0 0.205 0" rpy="0 0 0" /> -->
+    <origin xyz="0.0 0.18 0.0" rpy="0 0 0" />
+    <axis xyz="0 1 0" />
+  </joint>
+  
+  <link name="fixed_right_wheel_link">
+    <inertial>
+      <mass value="0.1"/>
+      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
+      <origin/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.57 0 0" />
+      <geometry>
+        <cylinder radius="0.04" length="0.07" />
+      </geometry>
+      <material name="grey_sfy"/>
+    </visual>
+        
+    <collision>
+      <origin xyz="0 0 0" rpy="1.57 0 0" />
+      <geometry>
+        <cylinder radius="0.04" length="0.07" />
+      </geometry>
+      <!-- <contact_coefficients mu="100" kp="10.0" kd="0.1"/> -->
+    </collision>
+  </link>
+
+  <joint name="base2fixed_right_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="fixed_right_wheel_link"/>
+    <!-- <origin xyz="0 -0.205 0" rpy="0 0 0" /> -->
+    <origin xyz="0.0 -0.18 0.0" rpy="0 0 0" />
+    <axis xyz="0 1 0" />
+  </joint>
+
+  <!-- imu -->
+  <joint name="imu_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="imu_link"/>
+    <origin xyz="1.3  0  0.85" rpy="0 0 0"/>
+  </joint>
+
+  <link name="imu_link"/>
+
+  <!-- scan -->
+  <joint name="lidar_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="lidar_link"/>
+    <origin xyz="1.462  0  0.90" rpy=" 0 0 0"/>
+  </joint>
+
+  <link name="lidar_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://sfy_ros/meshes/lidar.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+  </link>
+
+  <!-- D435i -->
+  <!-- <xacro:sensor_d435i name="camera"  parent="base_link" use_nominal_extrinsics="$(arg use_nominal_extrinsics)">
+    <origin xyz="0.8 0 0.9" rpy="0 0 0" />
+  </xacro:sensor_d435i> -->
+
+  <!-- <xacro:realsense_d435 sensor_name="camera" parent_link="base_link" rate="20">
+    <origin xyz="0.8 0 0.9" rpy="0 0 0" />
+  </xacro:realsense_d435> -->
+
+  <xacro:include filename="$(find realsense2_description)/urdf/_d435.urdf.xacro" />
+
+  <xacro:sensor_d435 name="camera" topics_ns="camera" parent="base_link" publish_pointcloud="true">
+    <origin xyz="1.74 0 0.44" rpy="0 0 0" />
+  </xacro:sensor_d435>
+
+</robot>

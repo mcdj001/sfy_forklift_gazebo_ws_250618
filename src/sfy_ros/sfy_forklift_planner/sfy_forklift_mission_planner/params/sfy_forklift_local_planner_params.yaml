@@ -1,0 +1,71 @@
+SfyForkliftLocalPlanner:
+  odom_topic: odom            # 里程计的话题名称
+
+  # AGV
+  expected_vel_x: 0.4         # AGV的x方向期望平移速度
+  max_vel_x: 0.6              # AGV的x方向的最大速度
+  max_vel_x_backwards: 0.2    # AGV倒车时的最大平移速度
+  max_vel_theta: 1.2          # AGV的最大角速度
+  acc_lim_x: 1.0                   # AGV的最大平移加速度
+  acc_lim_theta: 10.0          # AGV的最大角加速度
+  min_turn_radius: 0          # AGV的最小转弯半径
+  turn_around_priority: true  # 如果为true，机器人优先调整方向以适应路径的方向
+  stop_dist: 0.5              # 当规划路径上最近的致命点与机器人坐标系原点之间的欧氏距离小于此距离时，机器人停止
+  dec_dist: 1.0               # 当规划路径上最近的致命点与机器人坐标系原点之间的欧氏距离小于此距离时，机器人减速
+  forklift_wheelbase: 1.462   # 叉车的前后轮轴距
+  
+  pp_view_distance_ratio: 0.1 # pp算法前视距离系数ratio * v + view_distance  当fuzzy_ld_model开启时失效
+  pp_view_distance: 0.5             # pp算法前视距离 单位m    
+  slow_level1_distance: 1.0      # 离终点减速距离
+  slow_level1_vel: 0.4                 # 离终点减速速度
+  
+  # Trajectory
+  max_global_plan_lookahead_dist: 2.0   # 指定用于优化的全局规划子集的最大长度（累积欧几里得距离）
+  global_plan_viapoint_sep: 0.01        # 从全局规划中提取的每两个连续中途点之间的最小间隔
+  global_plan_prune_distance: 0.4       # 最后一个中途点与目标姿势之间的最小间隔
+  global_plan_goal_sep: 0.1             # 用于修剪的全局规划中机器人与中途点之间的距离
+
+  # GoalTolerance
+  xy_goal_tolerance: 0.2             # 位置方向上的目标容差 单位m
+  yaw_goal_tolerance: 0.2            # 姿态方向上的目标容差 单位rad
+
+  # Optimization
+  k_rho: 1                           # 基于agv位置到当前目标的欧氏距离进行线速度调整的比例参数
+  k_alpha: 0.01                      # 根据agv参照系中目标位置的切向角调整角速度的比例参数
+  k_phi: 3                           # 基于agv航向(yaw)与当前目标航向(yaw)之差调整角速度的比例参数
+  pp_front_k_p: -10                 # pp算法 仿真延迟  正向行驶 角速度比例参数      0.01
+  pp_front_k_i: 0.001                    # pp算法 仿真延迟  正向行驶 角速度二阶微分参数    0
+  pp_front_k_d: 5                  # pp算法 仿真延迟  正向行驶 角速度微分参数       0
+  pp_rear_k_p: 12                    # pp算法 仿真延迟  反向行驶 角速度比例参数
+  pp_rear_k_i: 0                     # pp算法 仿真延迟  反向行驶 角速度积分参数
+  pp_rear_k_d: 6                     # pp算法 仿真延迟  反向行驶 角速度微风参数
+  pid_front_k_p: 8                   # 3      8
+  pid_front_k_i: 0.01                # 0.05   0.01
+  pid_front_k_d: 0                   # 50     64
+  pid_rear_k_p: 3
+  pid_rear_k_i: 0.05
+  pid_rear_k_d: 50
+
+  # ForkliftChose
+  control_model: pp       # 控制模型，可选'pp' 或 'mpc'或 'pid'或'lqr_dynamic' 或 'lqr_kinematic'
+  steer_vel_delay_pid_model: false    # 是否开角速度延迟PID模型  由于gazebo仿真存在延迟
+  debug_model: true                  # 是否开启调试模式 在控制台上打印数据
+  fuzzy_ld_model: true               # 是否开启模糊控制模型调整前视距离
+  use_forklift_odom_combined: false    # 是否使用/odom_combined 话题的数据
+
+  # LQR
+  lqr_dynamic_q1: 100
+  lqr_dynamic_q2: 90
+  lqr_dynamic_q3: 100
+  lqr_dynamic_q4: 90
+  lqr_dynamic_r1: 101
+  lqr_kinematic_q1: 95
+  lqr_kinematic_q2: 95
+  lqr_kinematic_q3: 95
+  lqr_kinematic_r1: 100
+  lqr_kinematic_r2: 100
+  lf: 0.5
+  cf: 155494.663
+  cr: 155494.663
+  mass: 2080
+  horizon: 100
